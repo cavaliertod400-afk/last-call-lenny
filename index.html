@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
 <meta name="description" content="Lenny got cut off at the Rusty Nail and has to stumble home. A drunk side-scrolling platformer.">
 <meta name="theme-color" content="#1a0d2b">
 <meta name="mobile-web-app-capable" content="yes">
@@ -412,7 +412,29 @@ function fitView() {
   if (vw !== VW) { VW = vw; buf.width = VW; cv.width = VW * SC; if (L) cam = clamp(cam, 0, L.w * T - VW); }
   updateCompact();
 }
-function goTouch() { root.classList.add('touchy'); fitView(); }
+// stop the browser zooming when buttons are tapped fast or pinched, and undo any zoom that slips through
+let zoomGuarded = false;
+function lockZoom(reset) {
+  const m = document.querySelector('meta[name="viewport"]'); if (!m) return;
+  if (!m.dataset.base) m.dataset.base = m.content.replace(/,\s*(maximum-scale|minimum-scale|user-scalable)\s*=\s*[^,]*/gi, '');
+  const locked = m.dataset.base + ', maximum-scale=1, user-scalable=no';
+  if (reset) { m.content = m.dataset.base + ', maximum-scale=1.01'; requestAnimationFrame(() => { m.content = locked; }); }
+  else m.content = locked;
+}
+function guardZoom() {
+  if (zoomGuarded) return; zoomGuarded = true;
+  lockZoom(false);
+  const stop = e => { if (e.cancelable) e.preventDefault(); };
+  document.addEventListener('touchstart', stop, { passive: false });
+  document.addEventListener('touchmove', stop, { passive: false });
+  document.addEventListener('touchend', e => { stop(e); wake(); }, { passive: false });
+  document.addEventListener('dblclick', stop, { passive: false });
+  ['gesturestart', 'gesturechange', 'gestureend'].forEach(n => document.addEventListener(n, stop, { passive: false }));
+  document.addEventListener('pointerup', wake);
+  const vv = window.visualViewport;
+  if (vv) vv.addEventListener('resize', () => { if (vv.scale > 1.01) lockZoom(true); });
+}
+function goTouch() { root.classList.add('touchy'); guardZoom(); fitView(); }
 if (matchMedia('(pointer:coarse)').matches || navigator.maxTouchPoints > 0) goTouch();
 addEventListener('touchstart', goTouch, { passive: true, once: true });
 addEventListener('resize', fitView);
