@@ -392,7 +392,7 @@ function buildLevel(n) {
 }
 
 // ---------- state
-const G = { state: 'title', score: 0, caps: 0, lives: 3, night: 1, level: 0, time: 300, best: 0, checkpoint: false };
+const G = { state: 'title', score: 0, caps: 0, lives: 5, night: 1, level: 0, time: 300, best: 0, checkpoint: false };
 try { G.best = +localStorage.getItem('lcl-best') || 0; } catch (e) {}
 let L, player, enemies = [], items = [], shots = [], parts = [], pops = [], bumps = [], multi = {};
 let cam = 0, tick = 0, bac = 0.08, soberT = 0, soberNext = 12, flashT = 0, caption = '', captionT = 0;
@@ -422,7 +422,7 @@ function resetLevel() {
 }
 
 function startGame(cont) {
-  G.score = 0; G.caps = 0; G.lives = 3; G.checkpoint = false; deathReason = '';
+  G.score = 0; G.caps = 0; G.lives = 5; G.checkpoint = false; deathReason = '';
   if (!cont) { G.night = 1; G.level = 0; }
   resetLevel(); G.state = 'card'; stateT = 2.2; unlockAudio();
 }
@@ -1825,7 +1825,7 @@ function frame(now) {
 function start(data) {
   if (data && data.best) G.best = Math.max(G.best, data.best);
   resetLevel();
-  if (data && data.inGame) { G.score = data.score || 0; G.caps = data.caps || 0; G.lives = data.lives || 3; G.night = data.night || 1; G.level = data.level || 0; G.checkpoint = !!data.checkpoint; resetLevel(); G.state = 'card'; stateT = 1.5; }
+  if (data && data.inGame) { G.score = data.score || 0; G.caps = data.caps || 0; G.lives = data.lives || 5; G.night = data.night || 1; G.level = data.level || 0; G.checkpoint = !!data.checkpoint; resetLevel(); G.state = 'card'; stateT = 1.5; }
   drawIcons();
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(drawIcons);
   requestAnimationFrame(frame);
